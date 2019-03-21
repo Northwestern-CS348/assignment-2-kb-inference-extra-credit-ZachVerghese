@@ -142,6 +142,69 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        originalfactrule = ""
+        supported = ""
+        if isinstance(fact_or_rule,Fact):
+            thefact = self._get_fact(fact_or_rule)
+            if thefact in self.facts:
+                originalfactrule = "fact: "+ thefact.statement.__str__()
+                if thefact.asserted:
+                    originalfactrule += "  ASSERTED"
+                originalfactrule += "\n"
+                if thefact.supported_by:
+                    originalfactrule += self.get_supported(thefact,0)
+                print(originalfactrule)
+                return originalfactrule
+            else:
+                return "Fact is not in the KB"
+        elif isinstance(fact_or_rule,Rule):
+            therule = self._get_rule(fact_or_rule)
+            if therule in self.rules:
+                originalfactrule = "rule: " + self.create_rule_list(therule)
+                if therule.asserted:
+                    originalfactrule += " ASSERTED"
+                originalfactrule += "\n"
+                if therule.supported_by:
+                    originalfactrule += self.get_supported(therule,0)
+                print(originalfactrule)
+                return originalfactrule
+            else:
+                return "Rule is not in the KB"
+        else:
+            return "Not a fact or rule"
+
+    def get_supported(self,fact_or_rule, indent):
+        indent+=2
+        supported = ""
+        for thing in fact_or_rule.supported_by:
+            supported += (indent * " ") + "SUPPORTED BY\n"
+            # fact
+            if thing[0].asserted:
+                supported += ((indent+2)* " ") + "fact: " + thing[0].statement.__str__() + " ASSERTED\n"
+            else:
+                supported += ((indent+2)* " ") + "fact: " + thing[0].statement.__str__() + "\n"
+            supported += self.get_supported(thing[0], indent+2)
+            #rule
+            if thing[1].asserted:
+                supported += ((indent+2)* " ") + "rule: " + self.create_rule_list(thing[1]) + " ASSERTED\n"
+            else:
+                supported += ((indent+2)* " ") + "rule: " + self.create_rule_list(thing[1]) + "\n"
+            supported += self.get_supported(thing[1],indent+2)
+        return supported
+    
+    def create_rule_list(self,the_rule):
+        rule_list = "("
+        for i, left_element in enumerate(the_rule.lhs):
+            if i != len(the_rule.lhs) -1:
+                rule_list += left_element.__str__() + ", "
+            else:
+                rule_list+= left_element.__str__() + ") -> " + the_rule.rhs.__str__()
+        return rule_list
+            
+
+
+
+
 
 
 class InferenceEngine(object):
